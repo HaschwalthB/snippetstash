@@ -1,6 +1,5 @@
 <p align="center">
 <a href=https://github.com/HaschwalthB/snippetstash target="_blank">
-<img src='/placeholder.jpg' width="100%" alt="Banner" />
 </a>
 </p>
 
