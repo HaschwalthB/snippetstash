@@ -8,8 +8,8 @@ import (
 )
 
 type application struct {
-  errorLog *log.Logger
-  infoLog *log.Logger
+	errorLog *log.Logger
+	infoLog  *log.Logger
 }
 
 func main() {
@@ -19,24 +19,16 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO \t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR \t", log.Ldate|log.Ltime|log.Lshortfile)
 
-  app := &application{
-    errorLog: errorLog,
-    infoLog: infoLog,
-  }
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
 
-	files := http.FileServer(http.Dir("./ui/static/"))
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet/view", app.view)
-	mux.HandleFunc("/snippet/create", create)
-	mux.Handle("/static/", http.StripPrefix("/static", files))
-
-
-  srv := &http.Server {
-    Addr: *addr,
-    ErrorLog: errorLog,
-    Handler: mux,
-  }
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  app.routes(),
+	}
 	infoLog.Printf("starting server on: %s", *addr)
 	err := srv.ListenAndServe()
 	errorLog.Fatal(err)
