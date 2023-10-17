@@ -82,7 +82,8 @@ Include a concise explanation about the Tech Stack employed.
 
 ## 🚀 Run Locally
 Clone the snippetstash repository:
-```sh
+
+
 git clone https://github.com/HaschwalthB/snippetstash
 
 ## 🙌 Contributors
