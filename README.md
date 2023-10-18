@@ -12,9 +12,6 @@
 <img src="https://img.shields.io/github/license/HaschwalthB/snippetstash" alt="GitHub license" />
 </p>
 
-<p></p>
-<p></p>
-
 # 📌 Overview
 
 SnippetStash is a powerful code snippet manager that helps developers organize, search, and share code snippets for increased productivity.
@@ -76,13 +73,9 @@ SnippetStash is a powerful code snippet manager that helps developers organize, 
 - [**ui/static/img**](ui/static/img): Stores the image files used in the user interface.
 - [**ui/static/js**](ui/static/js): Holds the JavaScript files for implementing dynamic functionality in the user interface.
 
-## 💻 Stack
-
-Include a concise explanation about the Tech Stack employed.
 
 ## 🚀 Run Locally
 Clone the snippetstash repository:
-
 
 git clone https://github.com/HaschwalthB/snippetstash
 
@@ -92,7 +85,6 @@ git clone https://github.com/HaschwalthB/snippetstash
 </a>
 
 ## ☁️ Deploy
-
 `[Application name](Your App URL)`
 
 ## 📄 License
