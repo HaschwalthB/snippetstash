@@ -42,7 +42,7 @@ func main() {
 		ErrorLog: errorLog,
 		Handler:  app.routes(),
 	}
-	infoLog.Printf("starting server on: %s", *addr)
+	infoLog.Printf("starting server on %s", *addr)
 	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
@@ -53,7 +53,8 @@ func openDB(dsn string) (*sql.DB, error) {
   if err != nil {
     return nil, err
   }
-  if err = db.Ping(); err != nil {
+  err = db.Ping()
+  if err != nil {
     return nil, err
   }
   return db, nil
