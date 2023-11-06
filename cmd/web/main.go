@@ -19,9 +19,9 @@ type application struct {
 }
 
 func main() {
-	addr := flag.String("addr", ":4000", "HTTP network address")
+	addr := flag.String("addr", ":8080", "HTTP network address")
 
-	dsn := flag.String("dsn", "web:komeng@/snippetstash?parseTime=true", "MySQL")
+	dsn := flag.String("dsn", "web:komeng@/snippetbox?parseTime=true", "MySQL")
 
 	flag.Parse()
 	infoLog := log.New(os.Stdout, "INFO \t", log.Ldate|log.Ltime)
@@ -61,3 +61,4 @@ func openDB(dsn string) (*sql.DB, error) {
 	}
 	return db, nil
 }
+
