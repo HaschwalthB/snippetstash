@@ -3,13 +3,14 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
 	"github.com/HaschwalthB/snippetstash/internal/models"
 )
 
+// use the application struct to hold the application-wide dependencies for the web application
+// for now, it'll only contain fields for the two custom loggers, and database model.
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		app.notFound(w)
@@ -20,22 +21,16 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-	files := []string{
-		"./ui/html/base.html",
-		"./ui/html/partials/nav.html",
-		"./ui/html/pages/home.html",
-	}
-	ts, err := template.ParseFiles(files...)
+
+	snippets, err := app.snippets.Latest()
 	if err != nil {
-		app.errorLog.Println(err.Error())
 		app.serverError(w, err)
 		return
 	}
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.errorLog.Println(err.Error())
-		app.serverError(w, err)
-	}
+
+	data := app.newTemplateData(r)
+	data.Snippets = snippets
+	app.render(w, http.StatusOK, "home.html", data)
 }
 
 func (app *application) view(w http.ResponseWriter, r *http.Request) {
@@ -54,18 +49,20 @@ func (app *application) view(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	fmt.Fprintf(w, "%+v", snippet)
-}
 
+	data := app.newTemplateData(r)
+	data.Snippet = snippet
+	app.render(w, http.StatusOK, "view.html", data)
+
+}
 func (app *application) create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-
-	title := "Drink water"
-	content := "Drink water, and drink more water.\n"
+	title := "bird"
+	content := " can fly,\n and also drink\n"
 	expires := 7
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
