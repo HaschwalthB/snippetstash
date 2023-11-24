@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+	"time"
 
 	"github.com/HaschwalthB/snippetstash/internal/models"
 )
@@ -13,6 +14,16 @@ type templateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+}
+
+// function time format
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
+
+// create a template.FuncMap to register our custom function
+var function = template.FuncMap{
+	"date": humanDate,
 }
 
 // make a cache map templateCache
@@ -32,7 +43,8 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		// filepath.Base() returns the last element of the path, which is the file name like home.html, etc
 		name := filepath.Base(page)
 
-		tf, err := template.ParseFiles("./ui/html/base.html")
+		// must register our template function before we call ParseFiles()
+		tf, err := template.New(name).Funcs(function).ParseFiles("./ui/html/base.html")
 		if err != nil {
 			return nil, err
 		}

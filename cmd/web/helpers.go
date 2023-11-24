@@ -37,6 +37,7 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 		app.serverError(w, err)
 		return
 	}
+	// make buffer as temporay storage space before writing to the response writer
 	buf := new(bytes.Buffer)
 
 	err := tf.ExecuteTemplate(buf, "base", data)
@@ -45,5 +46,6 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 		return
 	}
 	w.WriteHeader(status)
+	// write the buffer to the response writer
 	buf.WriteTo(w)
 }
