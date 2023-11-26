@@ -1,16 +1,18 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+)
 
-func (app *application) routes() http.Handler{
-  mux := http.NewServeMux()
+func (app *application) routes() http.Handler {
+	mux := http.NewServeMux()
 
-  fileServer:= http.FileServer(http.Dir("./ui/static/")) 
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
 
-  mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-  mux.HandleFunc("/", app.home)
-  mux.HandleFunc("/snippet/view", app.view)
-  mux.HandleFunc("/snippet/create", app.create)
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.view)
+	mux.HandleFunc("/snippet/create", app.create)
 
-  return secureHeader(mux) 
+	return app.recoverPanic(app.logRequest(secureHeader(mux)))
 }
