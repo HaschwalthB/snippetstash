@@ -16,17 +16,19 @@ type templateData struct {
 	Snippets    []*models.Snippet
 }
 
-// function time format
+// make a function time format for snippet
 func humanDate(t time.Time) string {
-	return t.Format("02 Jan 2006 at 15:04")
+  return t.Local().Format("02 Jan 2006 at 15:04")
 }
 
 // create a template.FuncMap to register our custom function
+// FuncMap is map[string]any
 var function = template.FuncMap{
 	"date": humanDate,
 }
 
 // make a cache map templateCache
+// this handle all our html files
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
@@ -43,7 +45,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		// filepath.Base() returns the last element of the path, which is the file name like home.html, etc
 		name := filepath.Base(page)
 
-		// must register our template function before we call ParseFiles()
+		// must register our template function before parsing
 		tf, err := template.New(name).Funcs(function).ParseFiles("./ui/html/base.html")
 		if err != nil {
 			return nil, err
@@ -57,9 +59,9 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		if err != nil {
 			return nil, err
 		}
-		// name that containe the file name, that we extracted before in filepath.Base()
-		//and we store the template.Template value in the map as the value
-		// we assing tf as value to the key name
+		// name  containe the file name, that we extracted before in filepath.Base()
+		// and we store the template.Template value in the map as the value
+		// we  assign tf as value to the key name
 		cache[name] = tf
 		// name = home.html?
 		// tf = template.Template

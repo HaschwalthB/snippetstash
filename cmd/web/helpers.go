@@ -23,13 +23,15 @@ func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
 
+// make a method time format for footer, this return templateData struct, which is the CurrentYear field.
 func (app *application) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
 		CurrentYear: time.Now().Year(),
 	}
 }
 
-// make helper function for our parsing things
+// make helper function for our parsing map templateCache
+// initialize app.templateCache[page] with a page as a key
 func (app *application) render(w http.ResponseWriter, status int, page string, data *templateData) {
 	tf, ok := app.templateCache[page]
 	if !ok {

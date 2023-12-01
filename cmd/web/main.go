@@ -21,7 +21,7 @@ type application struct {
 }
 
 func main() {
-	addr := flag.String("addr", ":8080", "HTTP network address")
+	addr := flag.String("addr", ":9000", "HTTP network address")
 
 	dsn := flag.String("dsn", "web:komeng@/snippetbox?parseTime=true", "MySQL")
 	// parse the command-line flag before using it

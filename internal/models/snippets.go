@@ -15,6 +15,7 @@ type Snippet struct {
 	Expires time.Time
 }
 
+// this is a connection pool
 type SnippetModelDB struct {
 	DB *sql.DB
 }
