@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/HaschwalthB/snippetstash/internal/models"
 	"github.com/julienschmidt/httprouter"
@@ -54,26 +56,47 @@ func (app *application) view(w http.ResponseWriter, r *http.Request) {
 
 // snippetNew display the form for creating a new snippet
 func (app *application) snippetForm(w http.ResponseWriter, r *http.Request) {
-  data := app.newTemplateData(r)
-  app.render(w, http.StatusOK, "create.html", data)
+	data := app.newTemplateData(r)
+	app.render(w, http.StatusOK, "create.html", data)
 }
 
 // snippetPost handler and a event handler for the form submission
 func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
-  // parse the body request
-  err := r.ParseForm()
-  if err != nil {
-    app.clientError(w, http.StatusBadRequest)
-    return
-  }
-  // get the form data after parse, this return string
-  // so for context of expires we need to convert it to int
-  title := r.PostForm.Get("title")
-  content := r.PostForm.Get("content")
-  expires, err := strconv.Atoi(r.PostForm.Get("expires"))
-  if err != nil {
-    app.clientError(w, http.StatusBadRequest)
-  }
+	// parse the body request
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	// get the form data after parse, this return string
+	// so for context of expires we need to convert it to int
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+	}
+	// make a validation for the form
+	falidErrors := make(map[string]string)
+	// check title for empty string and long character
+	if strings.TrimSpace(title) == "" {
+		falidErrors["title"] = "the field cannot blank my friend"
+	} else if utf8.RuneCountInString(title) > 50 {
+		falidErrors["title"] = "to much!!! "
+	}
+	if strings.TrimSpace(content) == "" {
+		falidErrors["title"] = "cmon brohh!!! are you st**id or what. do you wanna make a snippet but you dont filled this up?. get a docter!"
+		return
+	}
+	if expires != 1 && expires != 7 && expires != 365 {
+		falidErrors["expires"] = "just choose one"
+		return
+	}
+
+	if len(falidErrors) > 0 {
+		fmt.Fprint(w, falidErrors)
+		return
+	}
 
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
