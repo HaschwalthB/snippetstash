@@ -86,11 +86,9 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if strings.TrimSpace(content) == "" {
 		falidErrors["title"] = "cmon brohh!!! are you st**id or what. do you wanna make a snippet but you dont filled this up?. get a docter!"
-		return
 	}
 	if expires != 1 && expires != 7 && expires != 365 {
 		falidErrors["expires"] = "just choose one"
-		return
 	}
 
 	if len(falidErrors) > 0 {
