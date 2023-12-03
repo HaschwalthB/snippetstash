@@ -12,8 +12,15 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// make a object for validation form
+type snippetCreateForm struct {
+  Title string
+  Content string
+  Expires int
+  ValidErrors map[string]string
+}
+
 // use the application struct to hold the application-wide dependencies for the web application
-// for now, it'll only contain fields for the two custom loggers, and database model.
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	snippets, err := app.snippets.Latest()
 	if err != nil {
@@ -76,27 +83,35 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 	}
+  form := &snippetCreateForm{
+    Title: title,
+    Content: content,
+    Expires: expires,
+    ValidErrors: map[string]string{},
+  }
+
 	// make a validation for the form
-	falidErrors := make(map[string]string)
 	// check title for empty string and long character
-	if strings.TrimSpace(title) == "" {
-		falidErrors["title"] = "the field cannot blank my friend"
-	} else if utf8.RuneCountInString(title) > 50 {
-		falidErrors["title"] = "to much!!! "
+	if strings.TrimSpace(form.Title) == "" {
+		form.ValidErrors["title"] = "the field cannot blank my friend"
+	} else if utf8.RuneCountInString(form.Title) > 50 {
+		form.ValidErrors["title"] = "to much!!! "
 	}
-	if strings.TrimSpace(content) == "" {
-		falidErrors["title"] = "cmon brohh!!! are you st**id or what. do you wanna make a snippet but you dont filled this up?. get a docter!"
+	if strings.TrimSpace(form.Content) == "" {
+		form.ValidErrors["title"] = "cmon brohh!!! are you st**id or what. do you wanna make a snippet but you dont filled this up?. get a docter!"
 	}
 	if expires != 1 && expires != 7 && expires != 365 {
-		falidErrors["expires"] = "just choose one"
+		form.ValidErrors["expires"] = "just choose one"
 	}
 
-	if len(falidErrors) > 0 {
-		fmt.Fprint(w, falidErrors)
+	if len(form.ValidErrors) > 0 {
+    data := app.newTemplateData(r)
+    data.Form = form
+    app.render(w, http.StatusUnauthorized, "create.html", data)
 		return
 	}
 
-	id, err := app.snippets.Insert(title, content, expires)
+	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
 		app.serverError(w, err)
 	}

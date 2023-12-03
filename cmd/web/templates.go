@@ -14,11 +14,12 @@ type templateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+	Form        any
 }
 
 // make a function time format for snippet
 func humanDate(t time.Time) string {
-  return t.Local().Format("02 Jan 2006 at 15:04")
+	return t.Local().Format("02 Jan 2006 at 15:04")
 }
 
 // create a template.FuncMap to register our custom function
