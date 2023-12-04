@@ -83,6 +83,8 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 	}
+  
+  // initialize it and register the form data
   form := &snippetCreateForm{
     Title: title,
     Content: content,
@@ -100,10 +102,11 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 	if strings.TrimSpace(form.Content) == "" {
 		form.ValidErrors["title"] = "cmon brohh!!! are you st**id or what. do you wanna make a snippet but you dont filled this up?. get a docter!"
 	}
-	if expires != 1 && expires != 7 && expires != 365 {
+	if form.Expires != 1 && form.Expires != 7 && form.Expires != 365 {
 		form.ValidErrors["expires"] = "just choose one"
 	}
 
+  // if there is an error, redisplay the form
 	if len(form.ValidErrors) > 0 {
     data := app.newTemplateData(r)
     data.Form = form
