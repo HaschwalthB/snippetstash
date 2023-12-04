@@ -14,10 +14,10 @@ import (
 
 // make a object for validation form
 type snippetCreateForm struct {
-  Title string
-  Content string
-  Expires int
-  ValidErrors map[string]string
+	Title       string
+	Content     string
+	Expires     int
+	ValidErrors map[string]string
 }
 
 // use the application struct to hold the application-wide dependencies for the web application
@@ -64,6 +64,10 @@ func (app *application) view(w http.ResponseWriter, r *http.Request) {
 // snippetNew display the form for creating a new snippet
 func (app *application) snippetForm(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
+
+	data.Form = &snippetCreateForm{
+		Expires: 365,
+	}
 	app.render(w, http.StatusOK, "create.html", data)
 }
 
@@ -75,7 +79,7 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	// get the form data after parse, this return string
+	// get the form data after parse from body request, this return string
 	// so for context of expires we need to convert it to int
 	title := r.PostForm.Get("title")
 	content := r.PostForm.Get("content")
@@ -83,14 +87,14 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 	}
-  
-  // initialize it and register the form data
-  form := &snippetCreateForm{
-    Title: title,
-    Content: content,
-    Expires: expires,
-    ValidErrors: map[string]string{},
-  }
+
+	// initialize it and register the form data
+	form := &snippetCreateForm{
+		Title:       title,
+		Content:     content,
+		Expires:     expires,
+		ValidErrors: map[string]string{},
+	}
 
 	// make a validation for the form
 	// check title for empty string and long character
@@ -106,11 +110,11 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 		form.ValidErrors["expires"] = "just choose one"
 	}
 
-  // if there is an error, redisplay the form
+	// if there is an error, redisplay the form
 	if len(form.ValidErrors) > 0 {
-    data := app.newTemplateData(r)
-    data.Form = form
-    app.render(w, http.StatusUnauthorized, "create.html", data)
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, http.StatusUnauthorized, "create.html", data)
 		return
 	}
 
