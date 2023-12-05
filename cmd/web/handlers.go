@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
+
+	"github.com/julienschmidt/httprouter"
 
 	"github.com/HaschwalthB/snippetstash/internal/models"
-	"github.com/julienschmidt/httprouter"
+	"github.com/HaschwalthB/snippetstash/internal/validator"
 )
 
 // make a object for validation form
@@ -18,6 +18,7 @@ type snippetCreateForm struct {
 	Content     string
 	Expires     int
 	ValidErrors map[string]string
+  validator.Validator
 }
 
 // use the application struct to hold the application-wide dependencies for the web application
@@ -58,7 +59,6 @@ func (app *application) view(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Snippet = snippet
 	app.render(w, http.StatusOK, "view.html", data)
-
 }
 
 // snippetNew display the form for creating a new snippet
@@ -93,30 +93,19 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 		Title:       title,
 		Content:     content,
 		Expires:     expires,
-		ValidErrors: map[string]string{},
 	}
+  
+  form.Checkvield(validator.NotBlank(form.Title), "title", "field required")
+  form.Checkvield(validator.MaxChars(form.Title, 100), title, "field must be less than 50 characters")
+  form.Checkvield(validator.NotBlank(form.Content), "content", "field required")
+  form.Checkvield(validator.PermittedInt(form.Expires, 1, 7, 365), "Expires", "invalid value")
 
-	// make a validation for the form
-	// check title for empty string and long character
-	if strings.TrimSpace(form.Title) == "" {
-		form.ValidErrors["title"] = "the field cannot blank my friend"
-	} else if utf8.RuneCountInString(form.Title) > 50 {
-		form.ValidErrors["title"] = "to much!!! "
-	}
-	if strings.TrimSpace(form.Content) == "" {
-		form.ValidErrors["title"] = "cmon brohh!!! are you st**id or what. do you wanna make a snippet but you dont filled this up?. get a docter!"
-	}
-	if form.Expires != 1 && form.Expires != 7 && form.Expires != 365 {
-		form.ValidErrors["expires"] = "just choose one"
-	}
-
-	// if there is an error, redisplay the form
-	if len(form.ValidErrors) > 0 {
-		data := app.newTemplateData(r)
-		data.Form = form
-		app.render(w, http.StatusUnauthorized, "create.html", data)
-		return
-	}
+  if !form.Valid() {
+    data := app.newTemplateData(r)
+    data.Form = form
+    app.render(w, http.StatusOK, "create.html", data)
+    return
+  }
 
 	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
