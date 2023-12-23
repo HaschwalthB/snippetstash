@@ -55,7 +55,6 @@ func (app *application) view(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	data := app.newTemplateData(r)
 	data.Snippet = snippet
 
@@ -111,3 +110,28 @@ func (app *application) snippetPost(w http.ResponseWriter, r *http.Request) {
 	// make a clean path to the snippetview page
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
+
+// add a new handler for the signup page
+
+func (app *application) userSignupForm(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Display the user signup form...")
+}
+
+func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Post the user account...")
+}
+
+func (app *application) userLoginForm(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Display login form...")
+}
+
+func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Authenticate and login user...")
+}
+
+func (app *application) userLogout(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Good bye!...")
+}
+
+
+
