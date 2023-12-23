@@ -1,23 +1,30 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/schema"
 
 	"github.com/HaschwalthB/snippetstash/internal/models"
 )
 
 type application struct {
-	errorLog      *log.Logger
-	infoLog       *log.Logger
-	snippets      *models.SnippetModelDB
-	templateCache map[string]*template.Template
+	errorLog       *log.Logger
+	infoLog        *log.Logger
+	snippets       *models.SnippetModelDB
+	templateCache  map[string]*template.Template
+	schema         *schema.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -44,21 +51,43 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// initialize a new schema decoder
+	decoder := schema.NewDecoder()
+
+	// initialize a new session manager
+	// we use our database as a session managet
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Secure = true
 	// initialize a new instance of application containing the dependencies
 	// snippets its a pointer to a SnippetModel struct, which holds a sql.DB connection pool
 	app := &application{
-		errorLog:      errorLog,
-		infoLog:       infoLog,
-		snippets:      &models.SnippetModelDB{DB: db},
-		templateCache: templateCache,
+		errorLog:       errorLog,
+		infoLog:        infoLog,
+		snippets:       &models.SnippetModelDB{DB: db},
+		templateCache:  templateCache,
+		schema:         decoder,
+		sessionManager: sessionManager,
 	}
+
+	// change the default setting of tls config3
+	tlsConfig := tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+		Addr:      *addr,
+		ErrorLog:  errorLog,
+		Handler:   app.routes(),
+		TLSConfig: &tlsConfig,
+
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 	infoLog.Printf("starting server on %s", *addr)
-	err = srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
 
