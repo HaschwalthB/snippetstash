@@ -13,6 +13,7 @@ type users struct {
 	Created        time.Time
 }
 
+// open connection pool to the database
 type UserModelDB struct {
 	*sql.DB
 }
@@ -28,7 +29,6 @@ func (m *UserModelDB) Authenticate(email, password string) (int, error) {
 }
 
 // check if a user already exists
-
 func (m *UserModelDB) Exists(id int) (bool, error) {
 	return false, nil
 }

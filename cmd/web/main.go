@@ -56,7 +56,7 @@ func main() {
 	decoder := schema.NewDecoder()
 
 	// initialize a new session manager
-	// we use our database as a session managet
+	// we use our database as a session manage
 	sessionManager := scs.New()
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
